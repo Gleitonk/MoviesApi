@@ -33,15 +33,21 @@ public class MovieController : ControllerBase
 
     [HttpGet]
     public IEnumerable<ReadMovieDto> GetMovies(
+        [FromQuery] string? cinemaName,
         [FromQuery] int skip = 0,
         [FromQuery] int take = 50
     )
     {
-        var movies = _context.Movies.Skip(skip).Take(take).ToList();
+        var movies = new List<Movie>();
+        if (cinemaName != null)
+        {
+            return _mapper.Map<List<ReadMovieDto>>(
+                     _context.Movies.ToList().Where(
+                         movie => movie.Sessions.Any(session => session.Cinema.Name == cinemaName)));
+        }
 
-        var moviesDto = _mapper.Map<List<ReadMovieDto>>(movies);
-
-        return moviesDto;
+        return _mapper.Map<List<ReadMovieDto>>(
+                    _context.Movies.Skip(skip).Take(take).ToList());
     }
 
     [HttpGet("{id}")]
@@ -83,7 +89,7 @@ public class MovieController : ControllerBase
 
         if (movie == null) return NotFound();
 
-       var movieToUpdate = _mapper.Map<UpdateMovieDto>(movie);
+        var movieToUpdate = _mapper.Map<UpdateMovieDto>(movie);
 
         patch.ApplyTo(movieToUpdate, ModelState);
 

@@ -2,7 +2,7 @@
 
 public class ReadSessionDto
 {
-    public ReadMovieDto Movie { get; set; }
+    public Guid MovieId { get; set; }
 
-    public ReadCinemaDto Cinema { get; set; }
+    public Guid CinemaId { get; set; }
 }

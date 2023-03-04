@@ -7,5 +7,5 @@ public class ReadMovieDto
     public int Duration { get; set; }
     public DateTime TimeCheck { get; set; } = DateTime.Now;
 
-    //public ICollection<ReadSessionDto> Sessions { get; set; }
+    public ICollection<ReadSessionDto> Sessions { get; set; }
 }

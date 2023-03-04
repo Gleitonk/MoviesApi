@@ -32,15 +32,25 @@ public class CinemaController : ControllerBase
 
     [HttpGet]
     public IEnumerable<ReadCinemaDto> GetCinemas(
+        [FromQuery] Guid? addressId,
         [FromQuery] int skip = 0,
         [FromQuery] int take = 50
     )
     {
-        var cinemas = _context.Cinemas.Skip(skip).Take(take).ToList();
+        var cinemas = new List<Cinema>();
+        if (addressId != null)
+        {
+            cinemas = _context.Cinemas.Where(cinema => cinema.AddressId == addressId).ToList();
+        }
+        else
+        {
+            cinemas = _context.Cinemas.Skip(skip).Take(take).ToList();
+        }
 
         var cinemasDto = _mapper.Map<List<ReadCinemaDto>>(cinemas);
         return cinemasDto;
     }
+
 
     [HttpGet("{id}")]
     public IActionResult GetCinemaById(Guid id)

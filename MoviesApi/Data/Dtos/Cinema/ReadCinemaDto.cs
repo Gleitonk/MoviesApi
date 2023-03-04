@@ -8,5 +8,5 @@ public class ReadCinemaDto
 
     public DateTime CheckDate { get; set; } = DateTime.Now;
 
-    //public ICollection<ReadSessionDto> Sessions { get; set; }
+    public ICollection<ReadSessionDto> Sessions { get; set; }
 }
