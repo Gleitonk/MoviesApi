@@ -45,7 +45,7 @@ public class MovieController : ControllerBase
     }
 
     [HttpGet("{id}")]
-    public IActionResult GetMovieById(int id)
+    public IActionResult GetMovieById(Guid id)
     {
         var movie = _context.Movies.FirstOrDefault(movie => movie.Id == id);
 
@@ -58,7 +58,7 @@ public class MovieController : ControllerBase
 
     [HttpPut("{id}")]
     public IActionResult UpdateMovie(
-        int id,
+        Guid id,
         [FromBody] UpdateMovieDto movieDto
     )
     {
@@ -75,7 +75,7 @@ public class MovieController : ControllerBase
 
     [HttpPatch("{id}")]
     public IActionResult UpdateMoviePartial(
-        int id,
+        Guid id,
         JsonPatchDocument<UpdateMovieDto> patch
     )
     {
@@ -97,7 +97,7 @@ public class MovieController : ControllerBase
     }
 
     [HttpDelete("{id}")]
-    public IActionResult DeleteMovie(int id)
+    public IActionResult DeleteMovie(Guid id)
     {
         var movie = _context.Movies.FirstOrDefault(movie => movie.Id == id);
 

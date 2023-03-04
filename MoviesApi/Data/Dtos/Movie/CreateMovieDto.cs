@@ -4,7 +4,7 @@ namespace MoviesApi.Data.Dtos;
 
 public class CreateMovieDto
 {
-    public int Id { get; set; }
+    public Guid Id { get; set; }
 
     [Required(ErrorMessage = "Title is required.")]
     [StringLength(80, ErrorMessage = "Title length must be up to 80 characters.")]

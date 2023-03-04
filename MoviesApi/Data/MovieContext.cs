@@ -7,7 +7,7 @@ public class MovieContext : DbContext
 {
     public DbSet<Movie> Movies { get; set; }
 
-    public MovieContext(DbContextOptions<MovieContext> opts): base(opts)
-    {    
+    public MovieContext(DbContextOptions<MovieContext> opts) : base(opts)
+    {
     }
 }

@@ -8,7 +8,13 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
 var connectionString = builder.Configuration.GetConnectionString("MovieConnection");
+
 builder.Services.AddDbContext<MovieContext>(opts =>
+ opts.UseMySql(connectionString,
+ ServerVersion.AutoDetect(connectionString)
+));
+
+builder.Services.AddDbContext<CinemaContext>(opts =>
  opts.UseMySql(connectionString,
  ServerVersion.AutoDetect(connectionString)
 ));

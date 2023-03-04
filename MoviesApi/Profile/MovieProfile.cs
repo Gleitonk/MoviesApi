@@ -1,10 +1,9 @@
-﻿using AutoMapper;
-using MoviesApi.Data.Dtos;
+﻿using MoviesApi.Data.Dtos;
 using MoviesApi.Models;
 
 namespace MoviesApi.Profiles;
 
-public class MovieProfile : Profile
+public class MovieProfile : AutoMapper.Profile
 {
     public MovieProfile()
     {
