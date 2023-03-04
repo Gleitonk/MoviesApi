@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MoviesApi.Data;
 
@@ -10,9 +11,11 @@ using MoviesApi.Data;
 namespace MoviesApi.Migrations
 {
     [DbContext(typeof(MovieContext))]
-    partial class MovieContextModelSnapshot : ModelSnapshot
+    [Migration("20230304165821_AddingSessionAndMovieRelation")]
+    partial class AddingSessionAndMovieRelation
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -115,15 +118,16 @@ namespace MoviesApi.Migrations
 
             modelBuilder.Entity("MoviesApi.Models.Session", b =>
                 {
-                    b.Property<Guid?>("MovieId")
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("char(36)");
 
-                    b.Property<Guid?>("CinemaId")
+                    b.Property<Guid>("MovieId")
                         .HasColumnType("char(36)");
 
-                    b.HasKey("MovieId", "CinemaId");
+                    b.HasKey("Id");
 
-                    b.HasIndex("CinemaId");
+                    b.HasIndex("MovieId");
 
                     b.ToTable("Sessions");
                 });
@@ -141,19 +145,11 @@ namespace MoviesApi.Migrations
 
             modelBuilder.Entity("MoviesApi.Models.Session", b =>
                 {
-                    b.HasOne("MoviesApi.Models.Cinema", "Cinema")
-                        .WithMany("Sessions")
-                        .HasForeignKey("CinemaId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("MoviesApi.Models.Movie", "Movie")
                         .WithMany("Sessions")
                         .HasForeignKey("MovieId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Cinema");
 
                     b.Navigation("Movie");
                 });
@@ -162,11 +158,6 @@ namespace MoviesApi.Migrations
                 {
                     b.Navigation("Cinema")
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("MoviesApi.Models.Cinema", b =>
-                {
-                    b.Navigation("Sessions");
                 });
 
             modelBuilder.Entity("MoviesApi.Models.Movie", b =>

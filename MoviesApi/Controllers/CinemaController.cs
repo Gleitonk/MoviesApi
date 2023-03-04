@@ -36,7 +36,7 @@ public class CinemaController : ControllerBase
         [FromQuery] int take = 50
     )
     {
-        var cinemas = _context.Cinemas.Skip(skip).Take(take);
+        var cinemas = _context.Cinemas.Skip(skip).Take(take).ToList();
 
         var cinemasDto = _mapper.Map<List<ReadCinemaDto>>(cinemas);
         return cinemasDto;

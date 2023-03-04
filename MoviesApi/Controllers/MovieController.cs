@@ -37,7 +37,7 @@ public class MovieController : ControllerBase
         [FromQuery] int take = 50
     )
     {
-        var movies = _context.Movies.Skip(skip).Take(take);
+        var movies = _context.Movies.Skip(skip).Take(take).ToList();
 
         var moviesDto = _mapper.Map<List<ReadMovieDto>>(movies);
 

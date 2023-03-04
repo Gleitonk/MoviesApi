@@ -11,8 +11,8 @@ using MoviesApi.Data;
 namespace MoviesApi.Migrations
 {
     [DbContext(typeof(MovieContext))]
-    [Migration("20230304024315_CreateAll")]
-    partial class CreateAll
+    [Migration("20230304220217_MovieIdAndCinemaIdOnSessionCanBeNull")]
+    partial class MovieIdAndCinemaIdOnSessionCanBeNull
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -20,6 +20,9 @@ namespace MoviesApi.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("ProductVersion", "7.0.3")
+                .HasAnnotation("Proxies:ChangeTracking", false)
+                .HasAnnotation("Proxies:CheckEquality", false)
+                .HasAnnotation("Proxies:LazyLoading", true)
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             modelBuilder.Entity("MoviesApi.Models.Address", b =>
@@ -67,10 +70,8 @@ namespace MoviesApi.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("char(36)");
 
-                    b.Property<string>("Address")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("varchar(100)");
+                    b.Property<Guid>("AddressId")
+                        .HasColumnType("char(36)");
 
                     b.Property<DateTime>("CreateDate")
                         .HasColumnType("datetime(6)");
@@ -81,6 +82,9 @@ namespace MoviesApi.Migrations
                         .HasColumnType("varchar(70)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("AddressId")
+                        .IsUnique();
 
                     b.ToTable("Cinemas");
                 });
@@ -110,6 +114,67 @@ namespace MoviesApi.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Movies");
+                });
+
+            modelBuilder.Entity("MoviesApi.Models.Session", b =>
+                {
+                    b.Property<Guid?>("MovieId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<Guid?>("CinemaId")
+                        .HasColumnType("char(36)");
+
+                    b.HasKey("MovieId", "CinemaId");
+
+                    b.HasIndex("CinemaId");
+
+                    b.ToTable("Sessions");
+                });
+
+            modelBuilder.Entity("MoviesApi.Models.Cinema", b =>
+                {
+                    b.HasOne("MoviesApi.Models.Address", "Address")
+                        .WithOne("Cinema")
+                        .HasForeignKey("MoviesApi.Models.Cinema", "AddressId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Address");
+                });
+
+            modelBuilder.Entity("MoviesApi.Models.Session", b =>
+                {
+                    b.HasOne("MoviesApi.Models.Cinema", "Cinema")
+                        .WithMany("Sessions")
+                        .HasForeignKey("CinemaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("MoviesApi.Models.Movie", "Movie")
+                        .WithMany("Sessions")
+                        .HasForeignKey("MovieId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Cinema");
+
+                    b.Navigation("Movie");
+                });
+
+            modelBuilder.Entity("MoviesApi.Models.Address", b =>
+                {
+                    b.Navigation("Cinema")
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("MoviesApi.Models.Cinema", b =>
+                {
+                    b.Navigation("Sessions");
+                });
+
+            modelBuilder.Entity("MoviesApi.Models.Movie", b =>
+                {
+                    b.Navigation("Sessions");
                 });
 #pragma warning restore 612, 618
         }

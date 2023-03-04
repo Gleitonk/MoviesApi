@@ -1,7 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-using System.ComponentModel.DataAnnotations;
-
-namespace MoviesApi.Data.Dtos;
+﻿namespace MoviesApi.Data.Dtos;
 
 public class ReadAddressDto
 {

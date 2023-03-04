@@ -14,11 +14,13 @@ namespace MoviesApi.Models
         [MaxLength(70, ErrorMessage = "Name length must be up to 70 characters.")]
         public string Name { get; set; }
 
-        [Required(ErrorMessage = "Address is required.")]
-        [MaxLength(100, ErrorMessage = "Address length must be up to 100 characters.")]
-        public string Address { get; set; }
-
         [Required]
         public DateTime CreateDate { get; set; } = DateTime.Now;
+
+        public Guid AddressId { get; set; }
+
+        public virtual Address Address { get; set; }
+
+        public virtual ICollection<Session> Sessions { get; set; }
     }
 }

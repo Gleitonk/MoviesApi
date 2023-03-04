@@ -24,4 +24,6 @@ public class Movie
 
     [Required]
     public DateTime CreateDate { get; set; } = DateTime.Now;
+
+    public virtual ICollection<Session> Sessions { get; set; }
 }

@@ -3,8 +3,10 @@
 public class ReadCinemaDto
 {
     public string Name { get; set; }
-    
-    public string Address { get; set; }
 
-    public DateTime TimeCheck { get; set; } = DateTime.Now;
+    public ReadAddressDto Address { get; set; }
+
+    public DateTime CheckDate { get; set; } = DateTime.Now;
+
+    //public ICollection<ReadSessionDto> Sessions { get; set; }
 }

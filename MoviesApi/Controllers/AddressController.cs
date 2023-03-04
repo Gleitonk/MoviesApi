@@ -39,7 +39,7 @@ public class AddressController : ControllerBase
         [FromQuery] int take = 50
     )
     {
-        var addresses = _context.Addresses.Skip(skip).Take(take);
+        var addresses = _context.Addresses.Skip(skip).Take(take).ToList();
 
         var addressesDto = _mapper.Map<List<ReadAddressDto>>(addresses);
 

@@ -31,4 +31,5 @@ public class Address
     public string ZipCode { get; set; }
 
     public DateTime CreateDate { get; set; } = DateTime.Now;
+    public virtual Cinema Cinema { get; set; }
 }

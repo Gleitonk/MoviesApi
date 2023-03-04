@@ -1,15 +1,23 @@
-﻿using AutoMapper;
-using MoviesApi.Data.Dtos;
+﻿using MoviesApi.Data.Dtos;
 using MoviesApi.Models;
 
-namespace MoviesApi.Profiles;
+namespace MoviesApi.Profile;
 
-public class CinemaProfile : Profile
+public class CinemaProfile : AutoMapper.Profile
 {
-    protected CinemaProfile()
+    public CinemaProfile()
     {
         CreateMap<CreateCinemaDto, Cinema>();
         CreateMap<UpdateCinemaDto, Cinema>();
-        CreateMap<Cinema, GetCinemaDto>();
+        CreateMap<Cinema, ReadCinemaDto>()
+            .ForMember(
+                cinemaDto => cinemaDto.Address,
+                opt => opt.MapFrom(cinema => cinema.Address)
+            );
+            //.ForMember(
+            //    cinemaDto => cinemaDto.Sessions,
+            //    opt => opt.MapFrom(cinema => cinema.Sessions)
+            //);
+        CreateMap<Cinema, UpdateCinemaDto>();
     }
 }
