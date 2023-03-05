@@ -1,34 +1,30 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
-using MoviesApi.Data;
 using MoviesApi.Data.Dtos;
-using MoviesApi.Models;
+using MoviesApi.Services;
 
 namespace MoviesApi.Controllers;
-
 
 [ApiController]
 [Route("[controller]")]
 public class MovieController : ControllerBase
 {
-    private readonly MovieContext _context;
+    private readonly MovieService _movieService;
     private readonly IMapper _mapper;
 
-    public MovieController(MovieContext context, IMapper mapper)
+    public MovieController(MovieService movieService, IMapper mapper)
     {
-        _context = context;
+        _movieService = movieService;
         _mapper = mapper;
     }
+
 
     [HttpPost]
     public IActionResult AddMovie([FromBody] CreateMovieDto movieDto)
     {
-        var movie = _mapper.Map<Movie>(movieDto);
-
-        _context.Movies.Add(movie);
-        _context.SaveChanges();
-        return CreatedAtAction(nameof(GetMovieById), new { id = movie.Id }, movie);
+        var readDto = _movieService.AddMovie(movieDto);
+        return CreatedAtAction(nameof(GetMovieById), new { id = readDto.Id }, readDto);
     }
 
     [HttpGet]
@@ -38,26 +34,15 @@ public class MovieController : ControllerBase
         [FromQuery] int take = 50
     )
     {
-        var movies = new List<Movie>();
-        if (cinemaName != null)
-        {
-            return _mapper.Map<List<ReadMovieDto>>(
-                     _context.Movies.ToList().Where(
-                         movie => movie.Sessions.Any(session => session.Cinema.Name == cinemaName)));
-        }
-
-        return _mapper.Map<List<ReadMovieDto>>(
-                    _context.Movies.Skip(skip).Take(take).ToList());
+        return _movieService.GetMovies(skip, take, cinemaName);
     }
 
     [HttpGet("{id}")]
     public IActionResult GetMovieById(Guid id)
     {
-        var movie = _context.Movies.FirstOrDefault(movie => movie.Id == id);
+        var movieDto = _movieService.GetMovieById(id);
 
-        if (movie == null) return NotFound();
-
-        var movieDto = _mapper.Map<ReadMovieDto>(movie);
+        if (movieDto == null) return NotFound();
 
         return Ok(movieDto);
     }
@@ -68,13 +53,9 @@ public class MovieController : ControllerBase
         [FromBody] UpdateMovieDto movieDto
     )
     {
-        var movie = _context.Movies.FirstOrDefault(movie => movie.Id == id);
+        var result = _movieService.UpdateMovie(id, movieDto);
 
-        if (movie == null) return NotFound();
-
-        _mapper.Map(movieDto, movie);
-
-        _context.SaveChanges();
+        if (result.IsFailed) return NotFound();
 
         return NoContent();
     }
@@ -85,8 +66,7 @@ public class MovieController : ControllerBase
         JsonPatchDocument<UpdateMovieDto> patch
     )
     {
-        var movie = _context.Movies.FirstOrDefault(movie => movie.Id == id);
-
+        var movie = _movieService.GetMovieById(id);
         if (movie == null) return NotFound();
 
         var movieToUpdate = _mapper.Map<UpdateMovieDto>(movie);
@@ -97,24 +77,19 @@ public class MovieController : ControllerBase
         {
             return ValidationProblem(ModelState);
         }
-        _mapper.Map(movieToUpdate, movie);
-        _context.SaveChanges();
+
+        var result = _movieService.UpdateMoviePartial(id, movieToUpdate);
+
         return NoContent();
     }
 
     [HttpDelete("{id}")]
     public IActionResult DeleteMovie(Guid id)
     {
-        var movie = _context.Movies.FirstOrDefault(movie => movie.Id == id);
+        var result = _movieService.DeleteMovie(id);
 
-        if (movie == null) return NotFound();
-
-        _context.Movies.Remove(movie);
-        _context.SaveChanges();
+        if (result.IsFailed) return NotFound();
 
         return NoContent();
     }
-
-
-
 }

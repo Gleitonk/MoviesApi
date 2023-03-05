@@ -1,5 +1,5 @@
-﻿using MoviesApi.Models;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
+using MoviesApi.Models;
 
 namespace MoviesApi.Data;
 
@@ -32,7 +32,7 @@ public class MovieContext : DbContext
            .HasForeignKey(session => session.MovieId);
 
         modelBuilder.Entity<Address>()
-            .HasOne(address=> address.Cinema)
+            .HasOne(address => address.Cinema)
             .WithOne(cinema => cinema.Address)
             .OnDelete(DeleteBehavior.Restrict);
     }

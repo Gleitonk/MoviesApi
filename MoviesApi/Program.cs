@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using MoviesApi.Data;
+using MoviesApi.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,6 +12,10 @@ builder.Services.AddDbContext<MovieContext>(opts =>
      opts.UseLazyLoadingProxies().UseMySql(connectionString,
      ServerVersion.AutoDetect(connectionString)
 ));
+
+builder.Services.AddScoped<MovieService, MovieService>();
+builder.Services.AddScoped<CinemaService, CinemaService>();
+builder.Services.AddScoped<AddressService, AddressService>();
 
 builder.Services.AddControllers();
 

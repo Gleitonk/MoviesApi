@@ -1,9 +1,8 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
-using MoviesApi.Data;
 using MoviesApi.Data.Dtos;
-using MoviesApi.Models;
+using MoviesApi.Services;
 
 namespace MoviesApi.Controllers;
 
@@ -13,28 +12,24 @@ namespace MoviesApi.Controllers;
 public class SessionController : ControllerBase
 {
 
-    private readonly MovieContext _context;
+    private readonly SessionService _sessionService;
     private readonly IMapper _mapper;
 
-    public SessionController(MovieContext context, IMapper mapper)
+    public SessionController(SessionService sessionService, IMapper mapper)
     {
-        _context = context;
+        _sessionService = sessionService;
         _mapper = mapper;
     }
 
-
     [HttpPost]
-    public IActionResult CreateSession(
-      [FromBody] CreateSessionDto sessionDto
-    )
+    public IActionResult CreateSession([FromBody] CreateSessionDto sessionDto)
     {
-        var session = _mapper.Map<Session>(sessionDto);
-        _context.Sessions.Add(session);
-        _context.SaveChanges();
+        var readDto = _sessionService.CreateSession(sessionDto);
+
         return CreatedAtAction(
                     nameof(GetSessionById),
-                    new { cinemaId = session.CinemaId, movieId = session.MovieId },
-                    session
+                    new { cinemaId = readDto.CinemaId, movieId = readDto.MovieId },
+                    readDto
                 );
     }
 
@@ -42,13 +37,11 @@ public class SessionController : ControllerBase
 
     [HttpGet]
     public IEnumerable<ReadSessionDto> GetSessions(
-    [FromQuery] int skip = 0,
-    [FromQuery] int take = 50
+        [FromQuery] int skip = 0,
+        [FromQuery] int take = 50
     )
     {
-        var sessions = _context.Sessions.Skip(skip).Take(take).ToList();
-
-        return _mapper.Map<List<ReadSessionDto>>(sessions);
+        return _sessionService.GetSessions(skip, take);
     }
 
     [HttpGet("{movieId}/{cinemaId}")]
@@ -57,11 +50,10 @@ public class SessionController : ControllerBase
         Guid cinemaId
     )
     {
-        var session = _context.Sessions
-            .FirstOrDefault(session => session.MovieId == movieId && session.CinemaId == cinemaId);
+        var sessionDto = _sessionService.GetSessionById(movieId, cinemaId);
 
-        if (session == null) return NotFound();
-        return Ok(_mapper.Map<ReadSessionDto>(session));
+        if (sessionDto == null) return NotFound();
+        return Ok(sessionDto);
     }
 
     [HttpPut("{movieId}/{cinemaId}")]
@@ -71,13 +63,8 @@ public class SessionController : ControllerBase
        [FromBody] UpdateSessionDto sessionDto
     )
     {
-        var session = _context.Sessions
-              .FirstOrDefault(session => session.MovieId == movieId && session.CinemaId == cinemaId);
-        if (session == null) return NotFound();
-
-        _mapper.Map(sessionDto, session);
-        _context.SaveChanges();
-
+        var result = _sessionService.UpdateSession(movieId, cinemaId, sessionDto);
+        if (result.IsFailed) return NotFound();
         return NoContent();
     }
 
@@ -88,8 +75,7 @@ public class SessionController : ControllerBase
         JsonPatchDocument<UpdateSessionDto> patch
     )
     {
-        var session = _context.Sessions
-              .FirstOrDefault(session => session.MovieId == movieId && session.CinemaId == cinemaId);
+        var session = _sessionService.GetSessionById(movieId, cinemaId);
         if (session == null) return NotFound();
 
         var sessionToUpdate = _mapper.Map<UpdateSessionDto>(session);
@@ -100,10 +86,7 @@ public class SessionController : ControllerBase
         {
             return ValidationProblem();
         }
-
-        _mapper.Map(sessionToUpdate, session);
-        _context.SaveChanges();
-
+        _sessionService.UpdateSessionPartial(movieId, cinemaId, sessionToUpdate);
         return NoContent();
     }
 
@@ -113,13 +96,8 @@ public class SessionController : ControllerBase
         Guid cinemaId
     )
     {
-        var session = _context.Sessions
-              .FirstOrDefault(session => session.MovieId == movieId && session.CinemaId == cinemaId);
-
-        if (session == null) return NotFound();
-        _context.Sessions.Remove(session);
-        _context.SaveChanges();
-
+        var result = _sessionService.DeleteSession(movieId, cinemaId);
+        if (result.IsFailed) return NotFound();
         return NoContent();
     }
 }

@@ -10,8 +10,8 @@ public class Address
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public Guid Id { get; set; }
 
-    [Required(ErrorMessage ="Street is required.")]
-    [MaxLength(100, ErrorMessage ="Street length must be up to 100 characters.")]
+    [Required(ErrorMessage = "Street is required.")]
+    [MaxLength(100, ErrorMessage = "Street length must be up to 100 characters.")]
     public string Street { get; set; }
 
     [Required(ErrorMessage = "Number is required.")]

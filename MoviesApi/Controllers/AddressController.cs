@@ -1,9 +1,8 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
-using MoviesApi.Data;
 using MoviesApi.Data.Dtos;
-using MoviesApi.Models;
+using MoviesApi.Services;
 
 namespace MoviesApi.Controllers;
 
@@ -11,12 +10,12 @@ namespace MoviesApi.Controllers;
 [Route("[controller]")]
 public class AddressController : ControllerBase
 {
-    private readonly MovieContext _context;
+    private readonly AddressService _addressService;
     private readonly IMapper _mapper;
 
-    public AddressController(MovieContext context, IMapper mapper)
+    public AddressController(AddressService addressService, IMapper mapper)
     {
-        _context = context;
+        _addressService = addressService;
         _mapper = mapper;
     }
 
@@ -25,11 +24,8 @@ public class AddressController : ControllerBase
         [FromBody] CreateAddressDto addressDto
     )
     {
-        var address = _mapper.Map<Address>(addressDto);
-
-        _context.Addresses.Add(address);
-        _context.SaveChanges();
-        return CreatedAtAction(nameof(GetAddressById), new { id = address.Id }, address);
+        var readDto = _addressService.AddAddress(addressDto);
+        return CreatedAtAction(nameof(GetAddressById), new { id = readDto.Id }, readDto);
     }
 
 
@@ -39,22 +35,14 @@ public class AddressController : ControllerBase
         [FromQuery] int take = 50
     )
     {
-        var addresses = _context.Addresses.Skip(skip).Take(take).ToList();
-
-        var addressesDto = _mapper.Map<List<ReadAddressDto>>(addresses);
-
-        return addressesDto;
+        return _addressService.GetAddresses(skip, take);
     }
 
     [HttpGet("{id}")]
     public IActionResult GetAddressById(Guid id)
     {
-        var address = _context.Addresses.FirstOrDefault(address => address.Id == id);
-
-        if (address == null) return NotFound();
-
-        var addressDto = _mapper.Map<ReadAddressDto>(address);
-
+        var addressDto = _addressService.GetAddressById(id);
+        if (addressDto == null) return NotFound();
         return Ok(addressDto);
     }
 
@@ -64,12 +52,8 @@ public class AddressController : ControllerBase
         [FromBody] UpdateAddressDto addressDto
     )
     {
-        var address = _context.Addresses.FirstOrDefault(address => address.Id == id);
-
-        if (address == null) return NotFound();
-
-        _mapper.Map(addressDto, address);
-        _context.SaveChanges();
+        var result = _addressService.UpdateAddress(id, addressDto);
+        if (result.IsFailed) return NotFound();
         return NoContent();
     }
 
@@ -79,7 +63,7 @@ public class AddressController : ControllerBase
         [FromBody] JsonPatchDocument<UpdateAddressDto> patch
     )
     {
-        var address = _context.Addresses.FirstOrDefault(address => address.Id == id);
+        var address = _addressService.GetAddressById(id);
 
         if (address == null) return NotFound();
 
@@ -92,8 +76,8 @@ public class AddressController : ControllerBase
             return ValidationProblem();
         }
 
-        _mapper.Map(addressToUpdate, address);
-        _context.SaveChanges();
+        _addressService.UpdateAddressPartial(id, addressToUpdate);
+
         return NoContent();
     }
 
@@ -102,14 +86,8 @@ public class AddressController : ControllerBase
         Guid id
     )
     {
-        var address = _context.Addresses.FirstOrDefault(address => address.Id == id);
-        if (address == null) return NotFound();
-
-        _context.Addresses.Remove(address);
-        _context.SaveChanges();
+        var address = _addressService.DeleteAddress(id);
+        if (address.IsFailed) return NotFound();
         return NoContent();
     }
-
-
-
 }
